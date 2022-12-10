@@ -1,8 +1,19 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Head from "next/head";
 import { motion } from "framer-motion";
+import { useTranslation } from "next-i18next";
+import { GetStaticProps, InferGetStaticPropsType } from "next";
+import { serverSideTranslations } from "next-i18next/serverSideTranslations";
+import { analytics } from "../lib";
 
-export default function Home() {
+const Home = (props: InferGetStaticPropsType<typeof getStaticProps>) => {
+  const { t } = useTranslation("common");
+
+  useEffect(() => {
+    console.log(props);
+    analytics.track("HomePage visited");
+  }, []);
+
   return (
     <div style={{ padding: "2rem" }}>
       <Head>
@@ -11,7 +22,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main>
-        <h1>Hei</h1>
+        <h1>{t("title")}</h1>
         <motion.div
           style={{ width: 100, height: 100, backgroundColor: "white" }}
           animate={{ x: 200 }}
@@ -19,4 +30,11 @@ export default function Home() {
       </main>
     </div>
   );
-}
+};
+
+export const getStaticProps: GetStaticProps = async ({ locale }) => ({
+  props: {
+    ...(await serverSideTranslations(locale ?? "no", ["common"])),
+  },
+});
+export default Home;
